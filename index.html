@@ -217,6 +217,58 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+  /* ── QR PANEL ── */
+  .qr-panel {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px 16px 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
+    z-index: 200;
+    text-align: center;
+    transition: transform 0.3s, opacity 0.3s;
+    cursor: pointer;
+  }
+  .qr-panel:hover { transform: scale(1.03); }
+  .qr-panel.hidden { transform: translateX(220px); opacity: 0; pointer-events: none; }
+  .qr-label {
+    margin-top: 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #1a1a2e;
+    line-height: 1.45;
+  }
+  .qr-url-small {
+    font-size: 0.58rem;
+    color: #7a8099;
+    margin-top: 3px;
+    word-break: break-all;
+    max-width: 148px;
+  }
+  .qr-hint {
+    font-size: 0.6rem;
+    color: #aaa;
+    margin-top: 6px;
+  }
+  .btn-qr-toggle {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 0.78rem; font-weight: 700;
+    cursor: pointer;
+    z-index: 199;
+    display: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  }
+  .btn-qr-toggle:hover { background: #c73652; }
 </style>
 </head>
 <body>
@@ -357,6 +409,50 @@
       .replace(/&/g,'&amp;').replace(/</g,'&lt;')
       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+</script>
+<!-- QR PANEL -->
+<div class="qr-panel" id="qr-panel" title="Clic para ocultar">
+  <div id="qr-canvas"></div>
+  <div class="qr-label">📲 Escanea para participar</div>
+  <div class="qr-url-small" id="qr-url-label"></div>
+  <div class="qr-hint">clic para ocultar</div>
+</div>
+<button class="btn-qr-toggle" id="btn-qr-toggle" onclick="showQR()">📷 Mostrar QR</button>
+
+<!-- QRCode.js (sin dependencias externas de imagen) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  (function() {
+    const participarURL = window.location.href
+      .replace('index.html','')
+      .replace(/\/$/, '') + '/participar.html';
+
+    // Generar QR
+    new QRCode(document.getElementById('qr-canvas'), {
+      text: participarURL,
+      width: 148,
+      height: 148,
+      colorDark: '#1a1a2e',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    document.getElementById('qr-url-label').textContent = participarURL;
+
+    // Toggle
+    const panel  = document.getElementById('qr-panel');
+    const toggle = document.getElementById('btn-qr-toggle');
+
+    panel.addEventListener('click', () => {
+      panel.classList.add('hidden');
+      toggle.style.display = 'block';
+    });
+
+    window.showQR = () => {
+      panel.classList.remove('hidden');
+      toggle.style.display = 'none';
+    };
+  })();
 </script>
 </body>
 </html>

@@ -288,6 +288,20 @@
   <div class="hero-tag">Foro de Integración · Semana</div>
   <h1>Participa en el<br>foro de <em>Evolución</em></h1>
   <p>Escribe tu aportación y aparecerá en el tablero en vivo que tu asesor está proyectando.</p>
+
+  <!-- Mini QR en participar.html -->
+  <div style="display:flex;align-items:center;justify-content:center;gap:18px;margin-top:20px;flex-wrap:wrap;">
+    <div style="background:#fff;border-radius:12px;padding:10px;box-shadow:0 4px 16px rgba(0,0,0,0.35);">
+      <div id="qr-mini"></div>
+      <div style="font-size:0.6rem;text-align:center;color:#1a1a2e;margin-top:6px;font-weight:700;letter-spacing:0.06em;">COMPARTE ESTA PÁGINA</div>
+    </div>
+    <div style="text-align:left;max-width:240px;">
+      <div style="font-size:0.7rem;color:#b0a898;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">URL directa</div>
+      <div id="self-url" style="font-size:0.78rem;color:#fbbf24;word-break:break-all;line-height:1.5;font-family:monospace;"></div>
+      <div style="font-size:0.72rem;color:#7a8099;margin-top:8px;">Compártela en el chat de Meet o YouTube para que tus compañeros accedan.</div>
+    </div>
+  </div>
+
   <div class="planteamiento">
     <div class="plan-title">📋 Recuerda el planteamiento</div>
     <div class="plan-parts">
@@ -495,6 +509,20 @@
     document.getElementById('char-display').textContent = '0';
     window.goScreen(1);
   };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  (function() {
+    const url = window.location.href.split('?')[0];
+    document.getElementById('self-url').textContent = url;
+    new QRCode(document.getElementById('qr-mini'), {
+      text: url,
+      width: 110, height: 110,
+      colorDark: '#1a1a2e',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  })();
 </script>
 </body>
 </html>
