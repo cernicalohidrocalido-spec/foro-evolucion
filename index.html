@@ -68,6 +68,100 @@
   .av-credit { font-size: 0.72rem; color: var(--muted); text-align: right; line-height: 1.5; }
   .av-credit strong { color: rgba(232,224,208,0.6); display: block; }
 
+  /* ── RESET BUTTON ── */
+  .btn-reset-board {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.35);
+    color: #f87171;
+    font-size: 0.78rem; font-weight: 700;
+    padding: 6px 14px; border-radius: 8px;
+    cursor: pointer; transition: all 0.2s;
+    letter-spacing: 0.04em;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .btn-reset-board:hover { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.6); color: #fca5a5; }
+
+  /* ── MODAL CONFIRMACIÓN ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-top: 3px solid #ef4444;
+    border-radius: 18px;
+    padding: 32px 36px;
+    max-width: 420px; width: 90%;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    transform: scale(0.9);
+    transition: transform 0.25s;
+  }
+  .modal-overlay.open .modal-box { transform: scale(1); }
+  .modal-icon { font-size: 2.4rem; margin-bottom: 12px; }
+  .modal-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.15rem; font-weight: 700;
+    color: #f5f0e8; margin-bottom: 8px;
+  }
+  .modal-desc {
+    font-size: 0.85rem; color: #7a8099;
+    line-height: 1.6; margin-bottom: 20px;
+  }
+  .modal-desc strong { color: #f87171; }
+  .modal-input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid #0f3460;
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: #f5f0e8;
+    font-size: 1rem; font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.1em;
+    outline: none;
+    font-family: monospace;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+  .modal-input:focus { border-color: #ef4444; }
+  .modal-input.ok { border-color: #22c55e; color: #86efac; }
+  .modal-btns { display: flex; gap: 10px; }
+  .btn-cancel-modal {
+    flex: 1; padding: 11px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid #0f3460;
+    border-radius: 10px;
+    color: #7a8099; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: background 0.2s;
+  }
+  .btn-cancel-modal:hover { background: rgba(255,255,255,0.1); }
+  .btn-confirm-reset {
+    flex: 1; padding: 11px;
+    background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.4);
+    border-radius: 10px;
+    color: #f87171; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.2s;
+    opacity: 0.4; pointer-events: none;
+  }
+  .btn-confirm-reset.ready { opacity: 1; pointer-events: all; }
+  .btn-confirm-reset.ready:hover { background: rgba(239,68,68,0.3); color: #fca5a5; }
+  .modal-progress {
+    font-size: 0.72rem; color: #7a8099;
+    margin-bottom: 14px; letter-spacing: 0.05em;
+  }
+  .modal-progress span { color: #ef4444; font-weight: 700; }
+
   /* ── QR / URL BANNER ── */
   .join-banner {
     background: linear-gradient(135deg, #0f3460, #1a1a2e);
@@ -282,12 +376,34 @@
     </div>
   </div>
   <div class="hd-right">
+    <button class="btn-reset-board" onclick="openResetModal()">🗑 Resetear tablero</button>
     <div class="count-badge" id="count-badge">0 participaciones</div>
     <div class="av-credit">
       A.V. Luis Felipe Lozano Román<strong>Prepa en Línea · SEP</strong>
     </div>
   </div>
 </header>
+
+<!-- MODAL CONFIRMACIÓN RESET -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">¿Borrar todas las participaciones?</div>
+    <div class="modal-desc">
+      Esta acción eliminará <strong>permanentemente</strong> todos los post-its del tablero y de Firebase.<br>
+      Para confirmar, escribe <strong>BORRAR</strong> en el campo de abajo.
+    </div>
+    <div class="modal-progress" id="modal-progress">Escribe BORRAR para continuar</div>
+    <input class="modal-input" id="modal-input" type="text"
+           placeholder="escribe BORRAR"
+           oninput="checkResetWord(this)"
+           autocomplete="off" spellcheck="false">
+    <div class="modal-btns">
+      <button class="btn-cancel-modal" onclick="closeResetModal()">Cancelar</button>
+      <button class="btn-confirm-reset" id="btn-confirm-reset" onclick="doReset()">🗑 Borrar todo</button>
+    </div>
+  </div>
+</div>
 
 <div class="join-banner">
   📲 Estudiantes: abre esta dirección para participar →
@@ -329,7 +445,8 @@
   import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, collection,
            onSnapshot, query,
-           orderBy }                from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+           orderBy, getDocs,
+           deleteDoc, doc }          from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(FIREBASE_CONFIG);
   const db  = getFirestore(app);
@@ -337,6 +454,61 @@
   // ── Mostrar URL de participar.html ──
   const base = window.location.href.replace('index.html','').replace(/\/$/, '');
   document.getElementById('join-url').textContent = base + '/participar.html';
+
+  // ── Modal de reset ──
+  window.openResetModal = () => {
+    document.getElementById('modal-input').value = '';
+    document.getElementById('btn-confirm-reset').classList.remove('ready');
+    document.getElementById('modal-progress').innerHTML = 'Escribe <span>BORRAR</span> para continuar';
+    document.getElementById('modal-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('modal-input').focus(), 200);
+  };
+  window.closeResetModal = () => {
+    document.getElementById('modal-overlay').classList.remove('open');
+  };
+  window.checkResetWord = (input) => {
+    const val = input.value.trim().toUpperCase();
+    const btn = document.getElementById('btn-confirm-reset');
+    const prog = document.getElementById('modal-progress');
+    if (val === 'BORRAR') {
+      btn.classList.add('ready');
+      input.classList.add('ok');
+      prog.innerHTML = '✓ Listo para borrar';
+    } else {
+      btn.classList.remove('ready');
+      input.classList.remove('ok');
+      const remaining = 'BORRAR'.slice(0, val.length) === val
+        ? `Sigue escribiendo: <span>BORRAR</span>`
+        : `Escribe exactamente: <span>BORRAR</span>`;
+      prog.innerHTML = remaining;
+    }
+  };
+  window.doReset = async () => {
+    const btn = document.getElementById('btn-confirm-reset');
+    btn.textContent = '⏳ Borrando…';
+    btn.classList.remove('ready');
+    try {
+      const snap = await getDocs(collection(db, 'participaciones'));
+      const deletes = snap.docs.map(d => deleteDoc(doc(db, 'participaciones', d.id)));
+      await Promise.all(deletes);
+      rendered = {};
+      document.getElementById('notes-grid').innerHTML = '';
+      document.getElementById('notes-grid').style.display = 'none';
+      document.getElementById('board-empty').style.display = 'flex';
+      document.getElementById('count-badge').textContent = '0 participaciones';
+      closeResetModal();
+    } catch(e) {
+      console.error(e);
+      alert('Error al borrar. Revisa las reglas de Firestore (necesitas allow delete).');
+      btn.textContent = '🗑 Borrar todo';
+      btn.classList.add('ready');
+    }
+  };
+
+  // Cerrar modal con Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeResetModal();
+  });
 
   // ── Colores y rotaciones ──
   const COLORS = ['nc0','nc1','nc2','nc3','nc4','nc5'];
