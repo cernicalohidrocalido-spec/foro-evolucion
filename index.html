@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tablero en Vivo · Foro Evolución Humana</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --border: #0f3460;
+    --ink: #e8e0d0;
+    --muted: #7a8099;
+    --accent: #e94560;
+
+    --note-colors: #fef08a, #86efac, #93c5fd, #f9a8d4, #fdba74, #c4b5fd;
+    --n1: #fef08a; --n1t: #713f12;
+    --n2: #86efac; --n2t: #14532d;
+    --n3: #93c5fd; --n3t: #1e3a5f;
+    --n4: #f9a8d4; --n4t: #831843;
+    --n5: #fdba74; --n5t: #7c2d12;
+    --n6: #c4b5fd; --n6t: #3b0764;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .hd-left { display: flex; align-items: center; gap: 14px; }
+  .live-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
+    animation: livepulse 1.5s infinite;
+  }
+  @keyframes livepulse {
+    0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+    100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  }
+  .hd-title { font-size: 1rem; font-weight: 700; }
+  .hd-sub   { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+  .hd-right { display: flex; align-items: center; gap: 20px; }
+  .count-badge {
+    background: rgba(233,69,96,0.15);
+    border: 1px solid rgba(233,69,96,0.35);
+    color: var(--accent);
+    font-size: 0.82rem; font-weight: 700;
+    padding: 4px 14px; border-radius: 20px;
+  }
+  .av-credit { font-size: 0.72rem; color: var(--muted); text-align: right; line-height: 1.5; }
+  .av-credit strong { color: rgba(232,224,208,0.6); display: block; }
+
+  /* ── QR / URL BANNER ── */
+  .join-banner {
+    background: linear-gradient(135deg, #0f3460, #1a1a2e);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 32px;
+    display: flex; align-items: center; justify-content: center; gap: 18px;
+    font-size: 0.82rem; color: var(--muted);
+  }
+  .join-url {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 5px 16px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: #fbbf24;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── BOARD ── */
+  .board {
+    padding: 36px 32px 60px;
+    min-height: calc(100vh - 120px);
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 50vh; gap: 16px;
+    animation: fadeIn 0.6s ease;
+  }
+  .empty-icon { font-size: 3.5rem; opacity: 0.4; }
+  .empty-text { font-size: 1.1rem; color: var(--muted); }
+  .empty-sub  { font-size: 0.85rem; color: rgba(122,128,153,0.6); }
+
+  /* ── POST-IT MASONRY GRID ── */
+  .notes-grid {
+    columns: 4 220px;
+    column-gap: 18px;
+  }
+  @media (max-width: 900px) { .notes-grid { columns: 2 200px; } }
+  @media (max-width: 560px) { .notes-grid { columns: 1; } }
+
+  /* ── POST-IT CARD ── */
+  .note {
+    break-inside: avoid;
+    margin-bottom: 18px;
+    border-radius: 4px 16px 16px 4px;
+    padding: 18px 18px 14px;
+    box-shadow: 3px 4px 18px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.2);
+    position: relative;
+    transform: rotate(var(--rot, 0deg));
+    transition: transform 0.25s, box-shadow 0.25s;
+    animation: noteIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    cursor: default;
+  }
+  .note:hover {
+    transform: rotate(0deg) scale(1.02) translateY(-3px);
+    box-shadow: 6px 10px 30px rgba(0,0,0,0.45);
+    z-index: 10;
+  }
+  /* Pin */
+  .note::before {
+    content: '';
+    position: absolute;
+    top: -7px; left: 50%;
+    transform: translateX(-50%);
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff 0%, #c0c0c0 50%, #888 100%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    z-index: 2;
+  }
+  @keyframes noteIn {
+    from { opacity: 0; transform: rotate(var(--rot, 0deg)) scale(0.6) translateY(30px); }
+    to   { opacity: 1; transform: rotate(var(--rot, 0deg)) scale(1) translateY(0); }
+  }
+
+  .note-num {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    margin-bottom: 6px;
+  }
+  .note-author {
+    font-family: 'Kalam', cursive;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .note-group {
+    font-size: 0.72rem;
+    font-weight: 400;
+    opacity: 0.65;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin-bottom: 10px;
+  }
+  .note-text {
+    font-family: 'Kalam', cursive;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    word-break: break-word;
+  }
+  .note-time {
+    margin-top: 10px;
+    font-size: 0.68rem;
+    opacity: 0.5;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    text-align: right;
+  }
+  .note-part-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    opacity: 0.75;
+  }
+
+  /* ── COLOR PALETTE for notes ── */
+  .nc0 { background: var(--n1); color: var(--n1t); }
+  .nc1 { background: var(--n2); color: var(--n2t); }
+  .nc2 { background: var(--n3); color: var(--n3t); }
+  .nc3 { background: var(--n4); color: var(--n4t); }
+  .nc4 { background: var(--n5); color: var(--n5t); }
+  .nc5 { background: var(--n6); color: var(--n6t); }
+
+  /* ── LOADING ── */
+  .loading {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 60vh; gap: 14px; color: var(--muted);
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-left">
+    <div class="live-dot"></div>
+    <div>
+      <div class="hd-title">🧬 Foro: Evolución Humana y Sociedad</div>
+      <div class="hd-sub">Tablero en vivo · Prepa en Línea-SEP</div>
+    </div>
+  </div>
+  <div class="hd-right">
+    <div class="count-badge" id="count-badge">0 participaciones</div>
+    <div class="av-credit">
+      A.V. Luis Felipe Lozano Román<strong>Prepa en Línea · SEP</strong>
+    </div>
+  </div>
+</header>
+
+<div class="join-banner">
+  📲 Estudiantes: abre esta dirección para participar →
+  <span class="join-url" id="join-url">cargando…</span>
+  (o escanea el QR en pantalla)
+</div>
+
+<main class="board" id="board">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <span>Conectando al tablero…</span>
+  </div>
+  <div id="board-empty" class="empty-state" style="display:none">
+    <div class="empty-icon">📌</div>
+    <div class="empty-text">El tablero está listo</div>
+    <div class="empty-sub">Las participaciones de tus estudiantes aparecerán aquí en tiempo real</div>
+  </div>
+  <div class="notes-grid" id="notes-grid" style="display:none"></div>
+</main>
+
+<!-- ════════════════════════════════════════════
+     FIREBASE + APP LOGIC
+     ════════════════════════════════════════════ -->
+<script type="module">
+  // ──────────────────────────────────────────────
+  // 🔧 REEMPLAZA ESTOS VALORES CON LOS TUYOS
+  //    (los obtienes en Paso 4 de la guía)
+  // ──────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyCF5i_rgmxPpT5oOsSZRs6r_GvrSbpgfew",
+    authDomain: "foro-evolucion.firebaseapp.com",
+    projectId: "foro-evolucion",
+    storageBucket: "foro-evolucion.firebasestorage.app",
+    messagingSenderId: "569380590815",
+    appId: "1:569380590815:web:23fbc9e9f15889aa4bc56a",
+    measurementId: "G-PC70W21112"
+  };
+  // ──────────────────────────────────────────────
+
+  import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection,
+           onSnapshot, query,
+           orderBy }                from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const app = initializeApp(FIREBASE_CONFIG);
+  const db  = getFirestore(app);
+
+  // ── Mostrar URL de participar.html ──
+  const base = window.location.href.replace('index.html','').replace(/\/$/, '');
+  document.getElementById('join-url').textContent = base + '/participar.html';
+
+  // ── Colores y rotaciones ──
+  const COLORS = ['nc0','nc1','nc2','nc3','nc4','nc5'];
+  const ROTS   = [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, -2, 1, -1, 2];
+  const PARTS  = ['','1ª Aportación','2ª Participación','3ª Participación','4ª Participación','Reflexión Final'];
+
+  const grid    = document.getElementById('notes-grid');
+  const empty   = document.getElementById('board-empty');
+  const loading = document.getElementById('loading');
+  const badge   = document.getElementById('count-badge');
+
+  let rendered = {};
+
+  // ── Suscripción en tiempo real ──
+  const q = query(collection(db, 'participaciones'), orderBy('timestamp', 'asc'));
+
+  onSnapshot(q, (snapshot) => {
+    loading.style.display = 'none';
+
+    snapshot.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const d  = change.doc.data();
+        const id = change.doc.id;
+        if (rendered[id]) return;
+        rendered[id] = true;
+        addNote(id, d, Object.keys(rendered).length);
+      }
+    });
+
+    const total = snapshot.size;
+    badge.textContent = total + (total === 1 ? ' participación' : ' participaciones');
+
+    if (total === 0) {
+      empty.style.display  = 'flex';
+      grid.style.display   = 'none';
+    } else {
+      empty.style.display  = 'none';
+      grid.style.display   = 'block';
+    }
+  });
+
+  function addNote(id, d, idx) {
+    const colorClass = COLORS[idx % COLORS.length];
+    const rot        = ROTS[idx % ROTS.length];
+    const partLabel  = PARTS[d.participacion] || ('Participación ' + d.participacion);
+
+    const ts = d.timestamp?.toDate
+      ? d.timestamp.toDate().toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
+      : '—';
+
+    const card = document.createElement('div');
+    card.className = `note ${colorClass}`;
+    card.style.setProperty('--rot', rot + 'deg');
+    card.style.animationDelay = (idx * 0.06) + 's';
+    card.id = 'note-' + id;
+
+    card.innerHTML = `
+      <div class="note-num">#${idx}</div>
+      <div class="note-part-badge" style="background:rgba(0,0,0,0.12)">${partLabel}</div>
+      <div class="note-author">✏️ ${esc(d.nombre)}</div>
+      <div class="note-group">Grupo: ${esc(d.grupo || '—')}</div>
+      <div class="note-text">${esc(d.texto)}</div>
+      <div class="note-time">🕐 ${ts}</div>
+    `;
+    grid.appendChild(card);
+  }
+
+  function esc(s) {
+    return String(s || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Participar · Foro Evolución Humana</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #f5f0e8;
+    --paper:   #fdfaf4;
+    --ink:     #1c1810;
+    --ink2:    #3d3828;
+    --muted:   #8a8070;
+    --border:  #e0d8c8;
+    --shadow:  rgba(28,24,16,0.10);
+    --accent:  #2563eb;
+    --success: #16a34a;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: #1c1810;
+    color: #f5f0e8;
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .hd-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+  }
+  .hd-logo span { color: #fbbf24; }
+  .hd-meta { font-size: 0.72rem; color: #8a8070; text-align: right; line-height: 1.5; }
+  .hd-meta strong { color: rgba(245,240,232,0.5); display: block; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #1c1810 0%, #2d2518 100%);
+    color: #f5f0e8;
+    padding: 36px 24px 40px;
+    text-align: center;
+  }
+  .hero-tag {
+    display: inline-block;
+    border: 1px solid rgba(251,191,36,0.3);
+    color: #fbbf24;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 3px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+  .hero h1 em { font-style: italic; color: #4ade80; }
+  .hero p { font-size: 0.88rem; color: #b0a898; max-width: 480px; margin: 0 auto; line-height: 1.65; }
+
+  /* ── PLANTEAMIENTO ── */
+  .planteamiento {
+    background: #fdfaf4;
+    border: 1px solid #e0d8c8;
+    border-left: 4px solid #fbbf24;
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 24px auto 0;
+    max-width: 560px;
+    width: calc(100% - 48px);
+  }
+  .plan-title { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .plan-parts { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .plan-part {
+    padding: 10px 14px; border-radius: 8px; font-size: 0.84rem; line-height: 1.55; color: var(--ink2);
+  }
+  .plan-a { background: rgba(22,163,74,0.07); border: 1px solid rgba(22,163,74,0.2); }
+  .plan-b { background: rgba(2,132,199,0.07); border: 1px solid rgba(2,132,199,0.2); }
+  .plan-letter { font-weight: 700; }
+
+  /* ── MAIN FORM ── */
+  main {
+    flex: 1;
+    padding: 32px 24px 60px;
+    max-width: 580px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .form-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 28px;
+    box-shadow: 0 4px 20px var(--shadow);
+  }
+
+  /* ── STEPS INDICATOR ── */
+  .steps-indicator {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 28px;
+    overflow: hidden; border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .step-ind {
+    flex: 1; padding: 8px 4px;
+    text-align: center;
+    font-size: 0.7rem; font-weight: 600;
+    color: var(--muted);
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1.3;
+  }
+  .step-ind:last-child { border-right: none; }
+  .step-ind.active { background: var(--ink); color: #f5f0e8; }
+  .step-ind.done   { background: rgba(22,163,74,0.12); color: #15803d; }
+  .step-ind .si-num { display: block; font-size: 0.9rem; font-weight: 700; }
+
+  /* ── FORM SCREEN ── */
+  .form-screen { display: none; }
+  .form-screen.visible { display: block; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── IDENTITY SCREEN ── */
+  .screen-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .screen-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 22px; line-height: 1.55; }
+
+  label {
+    display: block;
+    font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  input[type="text"], select, textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 16px;
+  }
+  input[type="text"]:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  }
+  textarea { min-height: 130px; resize: vertical; }
+
+  /* ── PART SELECTOR ── */
+  .part-selector {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 20px;
+  }
+  .part-opt {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg);
+    position: relative;
+  }
+  .part-opt input { display: none; }
+  .part-opt:hover { border-color: var(--accent); background: rgba(37,99,235,0.04); }
+  .part-opt.selected { border-color: var(--accent); background: rgba(37,99,235,0.07); }
+  .part-opt.selected::after {
+    content: '✓'; position: absolute; top: 8px; right: 10px;
+    font-size: 0.8rem; color: var(--accent); font-weight: 700;
+  }
+  .po-num { font-size: 0.7rem; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; }
+  .po-label { font-size: 0.82rem; color: var(--ink); line-height: 1.3; }
+
+  /* ── CHAR COUNT ── */
+  .char-info {
+    display: flex; justify-content: space-between;
+    font-size: 0.72rem; color: var(--muted); margin-top: -12px; margin-bottom: 18px;
+  }
+  .char-info .chars { font-weight: 600; }
+  .char-info .chars.warn { color: #dc2626; }
+
+  /* ── HINT BOX ── */
+  .hint-box {
+    background: rgba(37,99,235,0.05);
+    border: 1px solid rgba(37,99,235,0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.8rem; color: #1e40af; line-height: 1.55;
+    margin-bottom: 18px;
+    display: none;
+  }
+  .hint-box.visible { display: block; }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    width: 100%;
+    background: var(--ink);
+    color: #f5f0e8;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary:hover:not(:disabled) { background: #3d3828; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-back {
+    background: none; border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 18px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.88rem; color: var(--muted);
+    cursor: pointer; margin-top: 10px;
+    width: 100%; transition: background 0.2s;
+  }
+  .btn-back:hover { background: var(--border); }
+
+  /* ── SUCCESS ── */
+  .success-screen {
+    display: none; text-align: center;
+    animation: slideUp 0.4s ease;
+    padding: 12px 0;
+  }
+  .success-screen.visible { display: block; }
+  .success-icon {
+    font-size: 3.5rem; margin-bottom: 16px;
+    animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+  .success-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem; margin-bottom: 10px; color: var(--success);
+  }
+  .success-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.65; margin-bottom: 24px; }
+  .btn-another {
+    background: var(--success); color: white;
+    border: none; border-radius: 12px;
+    padding: 12px 28px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .btn-another:hover { background: #15803d; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.75rem; color: var(--muted);
+    border-top: 1px solid var(--border);
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-logo">Prepa en Línea · <span>SEP</span></div>
+  <div class="hd-meta">
+    A.V. Luis Felipe Lozano Román<strong>Foro · Evolución Humana</strong>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-tag">Foro de Integración · Semana</div>
+  <h1>Participa en el<br>foro de <em>Evolución</em></h1>
+  <p>Escribe tu aportación y aparecerá en el tablero en vivo que tu asesor está proyectando.</p>
+  <div class="planteamiento">
+    <div class="plan-title">📋 Recuerda el planteamiento</div>
+    <div class="plan-parts">
+      <div class="plan-part plan-a"><span class="plan-letter">A)</span> Menciona <strong>tres características relevantes</strong> de la evolución humana.</div>
+      <div class="plan-part plan-b"><span class="plan-letter">B)</span> Relaciona esas características con la <strong>sociedad actual y la tecnología</strong>.</div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="form-card">
+
+    <!-- STEPS INDICATOR -->
+    <div class="steps-indicator" id="steps-indicator">
+      <div class="step-ind active" id="si0"><span class="si-num">1</span>Identidad</div>
+      <div class="step-ind"        id="si1"><span class="si-num">2</span>Participación</div>
+      <div class="step-ind"        id="si2"><span class="si-num">3</span>Redacta</div>
+    </div>
+
+    <!-- SCREEN 0: Identidad -->
+    <div class="form-screen visible" id="sc0">
+      <div class="screen-title">¿Quién eres?</div>
+      <div class="screen-sub">Ingresa tu nombre y grupo para que tu participación aparezca en el tablero.</div>
+      <label for="input-nombre">Tu nombre completo</label>
+      <input type="text" id="input-nombre" placeholder="Ej. María González" maxlength="60">
+      <label for="input-grupo">Grupo o turno</label>
+      <input type="text" id="input-grupo" placeholder="Ej. Grupo 3 / Turno Matutino" maxlength="40">
+      <button class="btn-primary" onclick="goScreen(1)">Continuar →</button>
+    </div>
+
+    <!-- SCREEN 1: Tipo de participación -->
+    <div class="form-screen" id="sc1">
+      <div class="screen-title">¿Qué vas a publicar?</div>
+      <div class="screen-sub">Selecciona el tipo de participación que corresponde a este momento del foro.</div>
+      <div class="part-selector" id="part-selector">
+        <div class="part-opt" onclick="selectPart(this,1)">
+          <div class="po-num">Participación 1</div>
+          <div class="po-label">Respondo al planteamiento (A y B)</div>
+        </div>
+        <div class="part-opt" onclick="selectPart(this,2)">
+          <div class="po-num">Participación 2</div>
+          <div class="po-label">Comento a un compañero</div>
+        </div>
+        <div class="part-opt" onclick="selectPart(this,3)">
+          <div class="po-num">Participación 3</div>
+          <div class="po-label">Comento a otro compañero</div>
+        </div>
+        <div class="part-opt" onclick="selectPart(this,4)">
+          <div class="po-num">Participación 4</div>
+          <div class="po-label">Respondo a quien me comentó</div>
+        </div>
+        <div class="part-opt" onclick="selectPart(this,5)" style="grid-column:span 2">
+          <div class="po-num">Participación 5 · Final</div>
+          <div class="po-label">Reflexión integradora del grupo</div>
+        </div>
+      </div>
+      <button class="btn-primary" id="btn-to-sc2" onclick="goScreen(2)" disabled>Continuar →</button>
+      <button class="btn-back" onclick="goScreen(0)">← Volver</button>
+    </div>
+
+    <!-- SCREEN 2: Redactar -->
+    <div class="form-screen" id="sc2">
+      <div class="screen-title" id="sc2-title">Escribe tu aportación</div>
+      <div class="screen-sub" id="sc2-sub">Sé claro y argumenta tus ideas. Recuerda los criterios de la rúbrica.</div>
+      <div class="hint-box" id="hint-box"></div>
+      <label for="input-texto">Tu participación</label>
+      <textarea id="input-texto" placeholder="Escribe aquí tu aportación…" oninput="countText()"></textarea>
+      <div class="char-info">
+        <span>Mínimo recomendado: 80 caracteres</span>
+        <span class="chars" id="char-display">0</span>
+      </div>
+      <button class="btn-primary" id="btn-enviar" onclick="enviar()">
+        <span id="btn-label">📌 Publicar en el tablero</span>
+      </button>
+      <button class="btn-back" onclick="goScreen(1)">← Volver</button>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">¡Publicado!</div>
+      <p class="success-sub">Tu participación ya aparece en el tablero del asesor. Puedes seguir participando si necesitas agregar más aportaciones.</p>
+      <button class="btn-another" onclick="anotherPart()">Agregar otra participación</button>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  A.V. Luis Felipe Lozano Román &nbsp;·&nbsp; Prepa en Línea-SEP<br>
+  Foro de Integración · Evolución Humana y Sociedad
+</footer>
+
+<!-- ════════════════════════════════════════════
+     FIREBASE + APP LOGIC
+     ════════════════════════════════════════════ -->
+<script type="module">
+  // ──────────────────────────────────────────────
+  // 🔧 REEMPLAZA ESTOS VALORES CON LOS TUYOS
+  //    (los mismos que en index.html)
+  // ──────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyCF5i_rgmxPpT5oOsSZRs6r_GvrSbpgfew",
+    authDomain: "foro-evolucion.firebaseapp.com",
+    projectId: "foro-evolucion",
+    storageBucket: "foro-evolucion.firebasestorage.app",
+    messagingSenderId: "569380590815",
+    appId: "1:569380590815:web:23fbc9e9f15889aa4bc56a",
+    measurementId: "G-PC70W21112"
+   };
+  // ──────────────────────────────────────────────
+
+  import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection,
+           addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const app = initializeApp(FIREBASE_CONFIG);
+  const db  = getFirestore(app);
+
+  // ── State ──
+  let nombre = '', grupo = '', selectedPart = 0;
+
+  const HINTS = [
+    '',
+    'Desarrolla los puntos A y B: menciona tus tres características evolutivas con argumentos y conéctalas con ejemplos tecnológicos o sociales actuales.',
+    'Menciona a tu compañero/a por nombre, señala qué te pareció interesante de su aportación y agrega una pregunta o un dato que complemente su idea.',
+    'Elige a un segundo compañero diferente. Puedes estar a favor o en contra de su planteamiento; lo importante es argumentar tu postura.',
+    'Regresa a tu primera aportación. Si alguien te comentó, respóndele con reflexión. Si nadie lo hizo, comenta a otro compañero.',
+    'Lee todo el foro e integra las ideas más valiosas de tus compañeros. Menciona al menos dos aportaciones y cierra con una síntesis personal.',
+  ];
+  const SC2_TITLES = [
+    '', 'Tu respuesta al planteamiento', 'Tu comentario a un compañero',
+    'Tu comentario a otro compañero', 'Tu respuesta a un comentario', 'Tu reflexión integradora',
+  ];
+
+  // ── Exposed globals ──
+  window.goScreen = (n) => {
+    if (n === 1) {
+      nombre = document.getElementById('input-nombre').value.trim();
+      grupo  = document.getElementById('input-grupo').value.trim();
+      if (!nombre) { alert('Por favor escribe tu nombre.'); return; }
+    }
+    [0,1,2].forEach(i => {
+      document.getElementById('sc' + i).classList.toggle('visible', i === n);
+      const si = document.getElementById('si' + i);
+      si.classList.remove('active','done');
+      if (i < n) si.classList.add('done');
+      else if (i === n) si.classList.add('active');
+    });
+    document.getElementById('success-screen').classList.remove('visible');
+  };
+
+  window.selectPart = (el, num) => {
+    document.querySelectorAll('.part-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPart = num;
+    document.getElementById('btn-to-sc2').disabled = false;
+    document.getElementById('sc2-title').textContent = SC2_TITLES[num];
+    document.getElementById('sc2-sub').textContent   = 'Participación ' + num + ' de 5 — recuerda los criterios de la rúbrica.';
+    const hb = document.getElementById('hint-box');
+    hb.textContent = '💡 ' + HINTS[num];
+    hb.classList.add('visible');
+  };
+
+  window.countText = () => {
+    const len = document.getElementById('input-texto').value.length;
+    const el  = document.getElementById('char-display');
+    el.textContent = len;
+    el.classList.toggle('warn', len > 0 && len < 80);
+  };
+
+  window.enviar = async () => {
+    const texto = document.getElementById('input-texto').value.trim();
+    if (!texto || texto.length < 10) { alert('Por favor escribe tu participación (mínimo 10 caracteres).'); return; }
+    if (!selectedPart) { alert('Selecciona el tipo de participación.'); return; }
+
+    const btn = document.getElementById('btn-enviar');
+    const lbl = document.getElementById('btn-label');
+    btn.disabled = true;
+    lbl.textContent = '⏳ Publicando…';
+
+    try {
+      await addDoc(collection(db, 'participaciones'), {
+        nombre, grupo, texto,
+        participacion: selectedPart,
+        timestamp: serverTimestamp(),
+      });
+      // Show success
+      [0,1,2].forEach(i => document.getElementById('sc' + i).classList.remove('visible'));
+      document.getElementById('success-screen').classList.add('visible');
+      [0,1,2].forEach(i => {
+        const si = document.getElementById('si' + i);
+        si.classList.remove('active'); si.classList.add('done');
+      });
+    } catch(e) {
+      console.error(e);
+      alert('Hubo un error al publicar. Verifica tu conexión e inténtalo de nuevo.');
+    } finally {
+      btn.disabled = false;
+      lbl.textContent = '📌 Publicar en el tablero';
+    }
+  };
+
+  window.anotherPart = () => {
+    document.getElementById('input-texto').value = '';
+    document.getElementById('char-display').textContent = '0';
+    window.goScreen(1);
+  };
+</script>
+</body>
+</html>
